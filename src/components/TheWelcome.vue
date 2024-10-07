@@ -8,9 +8,9 @@ import SupportIcon from './icons/IconSupport.vue'
 import { io } from "socket.io-client";
 const socket = io('http://localhost:3000');
 socket.on("connect", () => {
-  console.log(socket.id); // x8WIv7-mJelg7on_ALbx
+  console.log(socket.id);
 });socket.on("test", (ar) => {
-  console.log(ar); // x8WIv7-mJelg7on_ALbx
+  console.log(ar);
 });
 
 </script>
