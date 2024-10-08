@@ -73,9 +73,8 @@ const registerUser = async () => {
   try {
     const response = await axios.post('/api/auth/login', formData.value);
     if (response.data.status) {
-      store.commit('login', response.data[0])
-      localStorage.setItem('token', response.data[0]);
-      router.push('/')
+      store.commit('login', response.data.data)
+      await router.push('/')
     }
   } catch (err) {
     const response = err.response.data;
