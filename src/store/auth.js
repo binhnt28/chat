@@ -1,4 +1,5 @@
 import { createStore } from 'vuex';
+import socketIo from '@/socket-io.js';
 const store = createStore({
     state: {
         isLoggedIn: false,
@@ -12,10 +13,13 @@ const store = createStore({
             state._id = data._id;
             localStorage.setItem('token', data.token);
             localStorage.setItem('_id', data._id);
+            socketIo.emit('registerUser', data._id);
         },
         logout(state) {
+            socketIo.emit('deleteUser', state._id);
             state.isLoggedIn = false;
             state.token = null;
+            state._id = null;
             localStorage.removeItem('token');
             localStorage.removeItem('_id');
         },

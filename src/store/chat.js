@@ -7,11 +7,17 @@ const store = createStore({
     mutations: {
         fetch(state, messages){
             state.messages = messages
+        },
+        setMessageId(state, id) {
+            state.messageId = id;
         }
     },
     actions: {
         fetchMessage({commit}, messages) {
             commit('fetch', messages)
+        },
+        updateMessageId({ commit }, id) {
+            commit('setMessageId', id);
         }
     }
 })

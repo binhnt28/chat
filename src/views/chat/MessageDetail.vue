@@ -1,24 +1,35 @@
 <script setup>
-import {defineProps, ref, watch} from 'vue';
+import {defineProps, ref, watch, onMounted } from 'vue';
 import axiosInstance from "@/axios.js";
 import socketIo from "@/socket-io.js";
+import store from "@/store/auth.js";
 const props = defineProps({
   messageId: {
-    type: String,
-    required: true
+    type: String
   }
-});
+ });
 let messages = ref([]);
+let messageContent = ref('');
+let info = ref({});
+let currentRoom = ref(null);
 const fetchMessage = async (messageId) => {
   const response = await axiosInstance.get(`/chat/detail-message/${messageId}`);
   messages.value = response.data.data.messages;
+  info.value = response.data.data.message.info[0];
+}
+
+const sendMessage = async () => {
+  let data = {
+      'receiveId': info.value._id,
+      'message': messageContent.value
+  }
+  const response = await axiosInstance.post(`/chat/create-message`, data);
 }
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   const now = new Date();
   const isToday = date.toDateString() === now.toDateString();
-
   if (isToday) {
     return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
   } else {
@@ -27,15 +38,23 @@ const formatDate = (dateString) => {
     return `${formattedDate} ${formattedTime}`;
   }
 };
-
-if (props.messageId) {
-  socketIo.emit('joinRoom', props.messageId);
-  fetchMessage(props.messageId);
-}
 watch(() => props.messageId, (newMessageId) => {
-  fetchMessage(newMessageId);
+  if (newMessageId) {
+    fetchMessage(newMessageId);
+    if (newMessageId !== currentRoom.value) {
+      if (currentRoom.value) {
+        socketIo.emit('leaveRoom', currentRoom.value);
+      }
+      socketIo.emit('joinRoom', newMessageId);
+      currentRoom.value = newMessageId;
+    }
+  }
 });
-
+onMounted(() => {
+  socketIo.on('newMessage', (message) => {
+    messages.value.push(message.last_message);
+  });
+});
 
 </script>
 
@@ -52,10 +71,10 @@ watch(() => props.messageId, (newMessageId) => {
                   <a href="javascript: void(0);" class="user-chat-remove text-muted font-size-16 p-2"><i class="ri-arrow-left-s-line"></i></a>
                 </div>
                 <div class="me-3 ms-0">
-                  <img src="../assets/images/users/avatar-4.jpg" class="rounded-circle avatar-xs" alt="">
+                  <img src="@/assets/images/users/avatar-4.jpg" class="rounded-circle avatar-xs" alt="">
                 </div>
                 <div class="flex-grow-1 overflow-hidden">
-                  <h5 class="font-size-16 mb-0 text-truncate"><a href="#" class="text-reset user-profile-show">Doris Brown</a> <i class="ri-record-circle-fill font-size-10 text-success d-inline-block ms-1"></i></h5>
+                  <h5 class="font-size-16 mb-0 text-truncate"><a href="#" class="text-reset user-profile-show">{{info.name}}</a> <i class="ri-record-circle-fill font-size-10 text-success d-inline-block ms-1"></i></h5>
                 </div>
               </div>
             </div>
@@ -73,19 +92,16 @@ watch(() => props.messageId, (newMessageId) => {
                     </div>
                   </div>
                 </li>
-
                 <li class="list-inline-item d-none d-lg-inline-block me-2 ms-0">
                   <button type="button" class="btn nav-btn" data-bs-toggle="modal" data-bs-target="#audiocallModal">
                     <i class="ri-phone-line"></i>
                   </button>
                 </li>
-
                 <li class="list-inline-item d-none d-lg-inline-block me-2 ms-0">
                   <button type="button" class="btn nav-btn" data-bs-toggle="modal" data-bs-target="#videocallModal">
                     <i class="ri-vidicon-line"></i>
                   </button>
                 </li>
-
                 <li class="list-inline-item d-none d-lg-inline-block me-2 ms-0">
                   <button type="button" class="btn nav-btn user-profile-show">
                     <i class="ri-user-2-line"></i>
@@ -118,7 +134,7 @@ watch(() => props.messageId, (newMessageId) => {
 <!--            <li>-->
 <!--              <div class="conversation-list">-->
 <!--                <div class="chat-avatar">-->
-<!--                  <img src="../assets/images/users/avatar-4.jpg" alt="">-->
+<!--                  <img src="@/assets/images/users/avatar-4.jpg" alt="">-->
 <!--                </div>-->
 <!--                <div class="user-chat-content">-->
 <!--                  <div class="ctext-wrap">-->
@@ -144,12 +160,11 @@ watch(() => props.messageId, (newMessageId) => {
 <!--                </div>-->
 <!--              </div>-->
 <!--            </li>-->
-            <li v-for="message in messages" class="right">
+            <li v-for="message in messages" :class="message.sender._id != store.state._id ? '' : 'right'">
               <div class="conversation-list">
                 <div class="chat-avatar">
-                  <img src="../assets/images/users/avatar-1.jpg" alt="">
+                  <img src="@/assets/images/users/avatar-1.jpg" alt="">
                 </div>
-
                 <div class="user-chat-content">
                   <div class="ctext-wrap">
                     <div class="ctext-wrap-content">
@@ -171,8 +186,7 @@ watch(() => props.messageId, (newMessageId) => {
                       </div>
                     </div>
                   </div>
-
-                  <div class="conversation-name">Patricia Smith</div>
+                  <div class="conversation-name">{{message.sender.name}}</div>
                 </div>
               </div>
             </li>
@@ -186,7 +200,7 @@ watch(() => props.messageId, (newMessageId) => {
 <!--            <li>-->
 <!--              <div class="conversation-list">-->
 <!--                <div class="chat-avatar">-->
-<!--                  <img src="../assets/images/users/avatar-4.jpg" alt="">-->
+<!--                  <img src="@/assets/images/users/avatar-4.jpg" alt="">-->
 <!--                </div>-->
 
 <!--                <div class="user-chat-content">-->
@@ -240,7 +254,7 @@ watch(() => props.messageId, (newMessageId) => {
 <!--            <li class="right">-->
 <!--              <div class="conversation-list">-->
 <!--                <div class="chat-avatar">-->
-<!--                  <img src="../assets/images/users/avatar-1.jpg" alt="">-->
+<!--                  <img src="@/assets/images/users/avatar-1.jpg" alt="">-->
 <!--                </div>-->
 
 <!--                <div class="user-chat-content">-->
@@ -273,7 +287,7 @@ watch(() => props.messageId, (newMessageId) => {
 <!--            <li>-->
 <!--              <div class="conversation-list">-->
 <!--                <div class="chat-avatar">-->
-<!--                  <img src="../assets/images/users/avatar-4.jpg" alt="">-->
+<!--                  <img src="@/assets/images/users/avatar-4.jpg" alt="">-->
 <!--                </div>-->
 
 <!--                <div class="user-chat-content">-->
@@ -283,14 +297,14 @@ watch(() => props.messageId, (newMessageId) => {
 <!--                      <ul class="list-inline message-img  mb-0">-->
 <!--                        <li class="list-inline-item message-img-list me-2 ms-0">-->
 <!--                          <div>-->
-<!--                            <a class="popup-img d-inline-block m-1" href="../assets/images/small/img-1.jpg" title="Project 1">-->
-<!--                              <img src="../assets/images/small/img-1.jpg" alt="" class="rounded border">-->
+<!--                            <a class="popup-img d-inline-block m-1" href="@/assets/images/small/img-1.jpg" title="Project 1">-->
+<!--                              <img src="@/assets/images/small/img-1.jpg" alt="" class="rounded border">-->
 <!--                            </a>-->
 <!--                          </div>-->
 <!--                          <div class="message-img-link">-->
 <!--                            <ul class="list-inline mb-0">-->
 <!--                              <li class="list-inline-item">-->
-<!--                                <a download="img-1.jpg" href="../assets/images/small/img-1.jpg" class="fw-medium">-->
+<!--                                <a download="img-1.jpg" href="@/assets/images/small/img-1.jpg" class="fw-medium">-->
 <!--                                  <i class="ri-download-2-line"></i>-->
 <!--                                </a>-->
 <!--                              </li>-->
@@ -311,14 +325,14 @@ watch(() => props.messageId, (newMessageId) => {
 
 <!--                        <li class="list-inline-item message-img-list">-->
 <!--                          <div>-->
-<!--                            <a class="popup-img d-inline-block m-1" href="../assets/images/small/img-2.jpg" title="Project 2">-->
-<!--                              <img src="../assets/images/small/img-2.jpg" alt="" class="rounded border">-->
+<!--                            <a class="popup-img d-inline-block m-1" href="@/assets/images/small/img-2.jpg" title="Project 2">-->
+<!--                              <img src="@/assets/images/small/img-2.jpg" alt="" class="rounded border">-->
 <!--                            </a>-->
 <!--                          </div>-->
 <!--                          <div class="message-img-link">-->
 <!--                            <ul class="list-inline mb-0">-->
 <!--                              <li class="list-inline-item">-->
-<!--                                <a download="img-2.jpg" href="../assets/images/small/img-2.jpg" class="fw-medium">-->
+<!--                                <a download="img-2.jpg" href="@/assets/images/small/img-2.jpg" class="fw-medium">-->
 <!--                                  <i class="ri-download-2-line"></i>-->
 <!--                                </a>-->
 <!--                              </li>-->
@@ -363,7 +377,7 @@ watch(() => props.messageId, (newMessageId) => {
 <!--            <li class="right">-->
 <!--              <div class="conversation-list">-->
 <!--                <div class="chat-avatar">-->
-<!--                  <img src="../assets/images/users/avatar-1.jpg" alt="">-->
+<!--                  <img src="@/assets/images/users/avatar-1.jpg" alt="">-->
 <!--                </div>-->
 
 <!--                <div class="user-chat-content">-->
@@ -386,7 +400,7 @@ watch(() => props.messageId, (newMessageId) => {
 <!--                          <div class="ms-4 me-0">-->
 <!--                            <div class="d-flex gap-2 font-size-20 d-flex align-items-start">-->
 <!--                              <div>-->
-<!--                                <a download="admin_v1.0.zip" href="../assets/images/small/admin_v1.0.zip" class="fw-medium">-->
+<!--                                <a download="admin_v1.0.zip" href="@/assets/images/small/admin_v1.0.zip" class="fw-medium">-->
 <!--                                  <i class="ri-download-2-line"></i>-->
 <!--                                </a>-->
 <!--                              </div>-->
@@ -430,7 +444,7 @@ watch(() => props.messageId, (newMessageId) => {
 <!--            <li>-->
 <!--              <div class="conversation-list">-->
 <!--                <div class="chat-avatar">-->
-<!--                  <img src="../assets/images/users/avatar-4.jpg" alt="">-->
+<!--                  <img src="@/assets/images/users/avatar-4.jpg" alt="">-->
 <!--                </div>-->
 
 <!--                <div class="user-chat-content">-->
@@ -463,7 +477,7 @@ watch(() => props.messageId, (newMessageId) => {
           <div class="row g-0">
 
             <div class="col">
-              <input type="text" class="form-control form-control-lg bg-light border-light" placeholder="Enter Message...">
+              <input type="text" v-model="messageContent" class="form-control form-control-lg bg-light border-light" placeholder="Enter Message...">
             </div>
             <div class="col-auto">
               <div class="chat-input-links ms-md-2 me-md-0">
@@ -479,7 +493,7 @@ watch(() => props.messageId, (newMessageId) => {
                     </button>
                   </li>
                   <li class="list-inline-item">
-                    <button type="submit" class="btn btn-primary font-size-16 btn-lg chat-send waves-effect waves-light">
+                    <button @click="sendMessage" type="submit" class="btn btn-primary font-size-16 btn-lg chat-send waves-effect waves-light">
                       <i class="ri-send-plane-2-fill"></i>
                     </button>
                   </li>
@@ -505,7 +519,7 @@ watch(() => props.messageId, (newMessageId) => {
 
         <div class="text-center p-4 border-bottom">
           <div class="mb-4">
-            <img src="../assets/images/users/avatar-4.jpg" class="rounded-circle avatar-lg img-thumbnail" alt="">
+            <img src="@/assets/images/users/avatar-4.jpg" class="rounded-circle avatar-lg img-thumbnail" alt="">
           </div>
 
           <h5 class="font-size-16 mb-1 text-truncate">Doris Brown</h5>
@@ -730,7 +744,7 @@ watch(() => props.messageId, (newMessageId) => {
           <div class="modal-body">
             <div class="text-center p-4">
               <div class="avatar-lg mx-auto mb-4">
-                <img src="../assets/images/users/avatar-4.jpg" alt="" class="img-thumbnail rounded-circle">
+                <img src="@/assets/images/users/avatar-4.jpg" alt="" class="img-thumbnail rounded-circle">
               </div>
 
               <h5 class="text-truncate">Doris Brown</h5>
@@ -767,7 +781,7 @@ watch(() => props.messageId, (newMessageId) => {
           <div class="modal-body">
             <div class="text-center p-4">
               <div class="avatar-lg mx-auto mb-4">
-                <img src="../assets/images/users/avatar-4.jpg" alt="" class="img-thumbnail rounded-circle">
+                <img src="@/assets/images/users/avatar-4.jpg" alt="" class="img-thumbnail rounded-circle">
               </div>
               <h5 class="text-truncate">Doris Brown</h5>
               <p class="text-muted mb-0">Start Video Call</p>

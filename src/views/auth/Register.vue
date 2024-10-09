@@ -20,7 +20,7 @@
                                                 <span class="input-group-text text-muted" id="basic-addon5">
                                                     <i class="ri-mail-line"></i>
                                                 </span>
-                      <input v-model="formData.name"  @input="clearError" type="email" class="form-control form-control-lg bg-light-subtle border-light" placeholder="Enter Email" aria-label="Enter Email" aria-describedby="basic-addon5">
+                      <input v-model="formData.name"  @input="clearError" type="text" class="form-control form-control-lg bg-light-subtle border-light" placeholder="Enter Email" aria-label="Enter Email" aria-describedby="basic-addon5">
                     </div>
                   </div>
                   <div class="mb-3">

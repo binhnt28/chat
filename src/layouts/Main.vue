@@ -10,4 +10,7 @@
  import '../assets/libs/magnific-popup/magnific-popup.css';
  import '../assets/libs/owl.carousel/assets/owl.carousel.min.css';
  import '../assets/libs/owl.carousel/assets/owl.theme.default.min.css';
+
+
+
 </script>

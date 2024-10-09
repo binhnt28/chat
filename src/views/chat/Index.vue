@@ -410,17 +410,17 @@
             <div class="chat-message-list px-2" data-simplebar>
               <ul class="list-unstyled chat-list chat-user-list">
                 <li v-for="message in messages">
-                  <a @click="() => { chatStore.state.messageId = message._id }">
+                  <a @click="chooseMessage(message._id)">
                     <div class="d-flex">
                       <div class="chat-user-img online align-self-center me-3 ms-0">
                         <img src="@/assets/images/users/avatar-1.jpg" class="rounded-circle avatar-xs" alt="">
                         <span class="user-status"></span>
                       </div>
                       <div class="flex-grow-1 overflow-hidden">
-                        <h5 class="text-truncate font-size-15 mb-1">{{ message.groupId === null ? message.user_join[0].name : ''}}</h5>
+                        <h5 class="text-truncate font-size-15 mb-1">{{ message.groupId == null ? message.info[0].name : ''}}</h5>
                         <p class="chat-user-message text-truncate mb-0">{{message.last_message.message}}</p>
                       </div>
-                      <div class="font-size-11">05 min</div>
+                      <div class="font-size-11">{{formatDate(message.last_message.created_at)}}</div>
                     </div>
                   </a>
                 </li>
@@ -1725,7 +1725,7 @@
 
   </div>
   <!-- end chat-leftsidebar -->
-  <MessageDetail :messageId="messageSelected"></MessageDetail>
+  <MessageDetail :messageId="messageId"></MessageDetail>
   <!-- Start User chat -->
 </template>
 <script setup>
@@ -1734,8 +1734,9 @@ import axiosInstance from "@/axios.js";
 import store from "@/store/auth.js";
 import chatStore from "@/store/chat.js";
 import { ref } from 'vue'
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import socketIo from "@/socket-io.js";
 const router = useRouter();
 const searchQuery = ref('');
 const searchUserByQuery = async () => {
@@ -1756,15 +1757,29 @@ const logout = async () => {
   await router.push('/Login');
 }
 const messages = computed(() => chatStore.state.messages);
-const messageSelected = computed(() => chatStore.state.messageId);
 const getListMessage = async () => {
-  try {
     const response = await axiosInstance.get('/chat/list-message');
-    console.log(response.data.data);
     chatStore.commit('fetch', response.data.data);
-  } catch (err) {
-
-  }
 }
+let messageId = ref('');
+const chooseMessage = (id) => {
+  console.log(id);
+  messageId.value = id;
+}
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+  if (isToday) {
+    return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  } else {
+    const formattedDate = date.toLocaleDateString('vi-VN');
+    const formattedTime = date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    return `${formattedDate} ${formattedTime}`;
+  }
+};
+onMounted(() => {
+  socketIo.connect();
+});
 getListMessage();
 </script>
