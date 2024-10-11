@@ -334,7 +334,52 @@
         <!-- Start chats content -->
         <div>
           <div class="px-4 pt-4">
+            <div class="user-chat-nav float-end">
+              <div data-bs-toggle="tooltip" data-bs-placement="bottom" title="Add Contact">
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-link text-decoration-none text-muted font-size-18 py-0" data-bs-toggle="modal" data-bs-target="#addContact-exampleModal">
+                  <i class="ri-user-add-line"></i>
+                </button>
+              </div>
+            </div>
             <h4 class="mb-4">Chats</h4>
+            <div class="modal fade" id="addContact-exampleModal" tabindex="-1" role="dialog" aria-labelledby="addContact-exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title font-size-16" id="addContact-exampleModalLabel">Add Contact</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    </button>
+                  </div>
+                  <div class="modal-body p-4">
+                    <form>
+                      <div class="mb-3">
+                        <label for="addcontactemail-input" class="form-label">Email</label>
+                        <input type="email" @input="searchUserByQuery" v-model="searchQuery" class="form-control" id="addcontactemail-input" placeholder="Enter Email">
+                        <ul v-if="showSuggestions && filteredUsers.length > 0" class="suggestions-list">
+                          <li
+                              v-for="(user, index) in filteredUsers"
+                              :key="index"
+                              @mousedown.prevent="selectUser(user)"
+                              class="suggestion-item"
+                          >
+                            {{ user.email }}
+                          </li>
+                        </ul>
+                      </div>
+                      <div class="mb-3">
+                        <label for="addcontact-invitemessage-input" class="form-label">Invatation Message</label>
+                        <textarea v-model="messageContent" class="form-control" id="addcontact-invitemessage-input" rows="3" placeholder="Enter Message"></textarea>
+                      </div>
+                    </form>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-link" data-bs-dismiss="modal">Close</button>
+                    <button type="button" @click="sendMessage" class="btn btn-primary">Invite Contact</button>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="search-box chat-search-box">
               <div class="input-group mb-3 rounded-3">
                                         <span class="input-group-text text-muted bg-light pe-1 ps-3" id="basic-addon1">
@@ -641,7 +686,7 @@
             <div class="user-chat-nav float-end">
               <div  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create group">
                 <!-- Button trigger modal -->
-                <button type="button" class="btn btn-link text-decoration-none text-muted font-size-18 py-0" data-bs-toggle="modal" data-bs-target="#addgroup-exampleModal">
+                <button type="button" class="btn btn-link text-decoration-none text-muted font-size-18 py-0" @click="getAllUser" data-bs-toggle="modal" data-bs-target="#addgroup-exampleModal">
                   <i class="ri-group-line me-1 ms-0"></i>
                 </button>
               </div>
@@ -662,7 +707,7 @@
                     <form>
                       <div class="mb-4">
                         <label for="addgroupname-input" class="form-label">Group Name</label>
-                        <input type="text" class="form-control" id="addgroupname-input" placeholder="Enter Group Name">
+                        <input v-model="group.name" type="text" class="form-control" id="addgroupname-input" placeholder="Enter Group Name">
                       </div>
                       <div class="mb-4">
                         <label class="form-label">Group Members</label>
@@ -681,160 +726,12 @@
                               <div data-simplebar style="max-height: 150px;">
                                 <div>
                                   <ul class="list-unstyled contact-list">
-                                    <li>
+                                    <li v-for="user in allUser">
                                       <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="memberCheck1" checked>
-                                        <label class="form-check-label" for="memberCheck1">Albert Rodarte</label>
+                                        <input type="checkbox" :value="user._id" class="form-check-input" id="memberCheck{{user.email}}" v-model="group.member">
+                                        <label class="form-check-label" for="memberCheck{{user.email}}">{{user.name}}</label>
                                       </div>
                                     </li>
-                                  </ul>
-                                </div>
-                                <div>
-                                  <div class="p-3 fw-bold text-primary">
-                                    C
-                                  </div>
-
-                                  <ul class="list-unstyled contact-list">
-                                    <li>
-                                      <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="memberCheck3">
-                                        <label class="form-check-label" for="memberCheck3">Craig Smiley</label>
-                                      </div>
-                                    </li>
-
-                                  </ul>
-                                </div>
-
-                                <div>
-                                  <div class="p-3 fw-bold text-primary">
-                                    D
-                                  </div>
-
-                                  <ul class="list-unstyled contact-list">
-                                    <li>
-                                      <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="memberCheck4">
-                                        <label class="form-check-label" for="memberCheck4">Daniel Clay</label>
-                                      </div>
-                                    </li>
-
-                                  </ul>
-                                </div>
-
-                                <div>
-                                  <div class="p-3 fw-bold text-primary">
-                                    I
-                                  </div>
-
-                                  <ul class="list-unstyled contact-list">
-                                    <li>
-                                      <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="memberCheck5">
-                                        <label class="form-check-label" for="memberCheck5">Iris Wells</label>
-                                      </div>
-                                    </li>
-
-                                  </ul>
-                                </div>
-
-                                <div>
-                                  <div class="p-3 fw-bold text-primary">
-                                    J
-                                  </div>
-
-                                  <ul class="list-unstyled contact-list">
-                                    <li>
-                                      <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="memberCheck6">
-                                        <label class="form-check-label" for="memberCheck6">Juan Flakes</label>
-                                      </div>
-                                    </li>
-
-                                    <li>
-                                      <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="memberCheck7">
-                                        <label class="form-check-label" for="memberCheck7">John Hall</label>
-                                      </div>
-                                    </li>
-
-                                    <li>
-                                      <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="memberCheck8">
-                                        <label class="form-check-label" for="memberCheck8">Joy Southern</label>
-                                      </div>
-                                    </li>
-
-                                  </ul>
-                                </div>
-
-                                <div>
-                                  <div class="p-3 fw-bold text-primary">
-                                    M
-                                  </div>
-
-                                  <ul class="list-unstyled contact-list">
-                                    <li>
-                                      <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="memberCheck9">
-                                        <label class="form-check-label" for="memberCheck9">Michael Hinton</label>
-                                      </div>
-                                    </li>
-
-                                    <li>
-                                      <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="memberCheck10">
-                                        <label class="form-check-label" for="memberCheck10">Mary Farmer</label>
-                                      </div>
-                                    </li>
-
-                                  </ul>
-                                </div>
-
-                                <div>
-                                  <div class="p-3 fw-bold text-primary">
-                                    P
-                                  </div>
-
-                                  <ul class="list-unstyled contact-list">
-                                    <li>
-                                      <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="memberCheck11">
-                                        <label class="form-check-label" for="memberCheck11">Phillis Griffin</label>
-                                      </div>
-                                    </li>
-
-                                  </ul>
-                                </div>
-
-                                <div>
-                                  <div class="p-3 fw-bold text-primary">
-                                    R
-                                  </div>
-
-                                  <ul class="list-unstyled contact-list">
-                                    <li>
-                                      <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="memberCheck12">
-                                        <label class="form-check-label" for="memberCheck12">Rocky Jackson</label>
-                                      </div>
-                                    </li>
-
-                                  </ul>
-                                </div>
-
-                                <div>
-                                  <div class="p-3 fw-bold text-primary">
-                                    S
-                                  </div>
-
-                                  <ul class="list-unstyled contact-list">
-                                    <li>
-                                      <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="memberCheck13">
-                                        <label class="form-check-label" for="memberCheck13">Simon Velez</label>
-                                      </div>
-                                    </li>
-
                                   </ul>
                                 </div>
                               </div>
@@ -844,14 +741,14 @@
                         </div>
                       </div>
                       <div class="mb-3">
-                        <label for="addgroupdescription-input" class="form-label">Description</label>
-                        <textarea class="form-control" id="addgroupdescription-input" rows="3" placeholder="Enter Description"></textarea>
+                        <label for="addgroupdescription-input" class="form-label">Message</label>
+                        <textarea v-model="group.message" class="form-control" id="addgroupdescription-input" rows="3" placeholder="Enter Description"></textarea>
                       </div>
                     </form>
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-link" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Create Groups</button>
+                    <button type="button" @click="createGroup" class="btn btn-primary">Create Groups</button>
                   </div>
                 </div>
               </div>
@@ -989,42 +886,13 @@
           <div class="p-4">
             <div class="user-chat-nav float-end">
               <div data-bs-toggle="tooltip" data-bs-placement="bottom" title="Add Contact">
-                <!-- Button trigger modal -->
                 <button type="button" class="btn btn-link text-decoration-none text-muted font-size-18 py-0" data-bs-toggle="modal" data-bs-target="#addContact-exampleModal">
                   <i class="ri-user-add-line"></i>
                 </button>
               </div>
             </div>
             <h4 class="mb-4">Contacts</h4>
-            <div class="modal fade" id="addContact-exampleModal" tabindex="-1" role="dialog" aria-labelledby="addContact-exampleModalLabel" aria-hidden="true">
-              <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title font-size-16" id="addContact-exampleModalLabel">Add Contact</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                    </button>
-                  </div>
-                  <div class="modal-body p-4">
-                    <form>
-                      <div class="mb-3">
-                        <label for="addcontactemail-input" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="addcontactemail-input" placeholder="Enter Email">
-                      </div>
-                      <div class="mb-3">
-                        <label for="addcontact-invitemessage-input" class="form-label">Invatation Message</label>
-                        <textarea class="form-control" id="addcontact-invitemessage-input" rows="3" placeholder="Enter Message"></textarea>
-                      </div>
-                    </form>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-link" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Invite Contact</button>
-                  </div>
-                </div>
-              </div>
-            </div>
             <!-- End Add contact Modal -->
-
             <div class="search-box chat-search-box">
               <div class="input-group bg-light  input-group-lg rounded-3">
                 <div class="input-group-prepend">
@@ -1727,6 +1595,16 @@ import { useRouter } from "vue-router";
 import socketIo from "@/socket-io.js";
 const router = useRouter();
 const searchQuery = ref('');
+const filteredUsers = ref([]);
+const showSuggestions = ref(false);
+const receiveId = ref('');
+const messageContent = ref('');
+const allUser = ref([]);
+const group = ref({
+  name: '',
+  member: [],
+  message: ''
+});
 const searchUserByQuery = async () => {
   try {
     if (searchQuery.value.length < 2) {
@@ -1735,9 +1613,23 @@ const searchUserByQuery = async () => {
     const response = await axiosInstance.get('/user/search', {
       params: { query : searchQuery.value }
     });
+    filteredUsers.value = response.data;
+    showSuggestions.value = true;
   } catch (err) {
-
+    filteredUsers.value = []
   }
+}
+const selectUser = (user) => {
+  // Khi chọn một email, cập nhật giá trị input và ẩn gợi ý
+  searchQuery.value = user.email;
+  showSuggestions.value = false;
+  receiveId.value = user._id.toString();
+}
+const hideSuggestions = () => {
+  // Delay để không mất sự kiện khi nhấn vào đề xuất
+  setTimeout(() => {
+    this.showSuggestions = false;
+  }, 100);
 }
 
 const logout = async () => {
@@ -1749,9 +1641,12 @@ const getListMessage = async () => {
     const response = await axiosInstance.get('/chat/list-message');
     chatStore.commit('fetch', response.data.data);
 }
+const getAllUser = async () => {
+  const response = await axiosInstance.get('/user/all-user');
+  allUser.value = response.data.data;
+}
 let messageId = ref('');
 const chooseMessage = (id) => {
-  console.log(id);
   messageId.value = id;
 }
 const formatDate = (dateString) => {
@@ -1766,8 +1661,58 @@ const formatDate = (dateString) => {
     return `${formattedDate} ${formattedTime}`;
   }
 };
+
+const sendMessage = async () => {
+  let data = {
+    'receiveId': receiveId.value,
+    'message': messageContent.value
+  }
+  const response = await axiosInstance.post(`/chat/create-message`, data);
+  if (response.data.status) {
+    messageContent.value = '';
+    let listMessage = chatStore.state.messages;
+    const findMessage = listMessage.findIndex((item) => item._id == response.data.data.message._id);
+    if (findMessage !== -1) {
+      listMessage[findMessage].last_message = response.data.data.message.last_message;
+      let currentMessage = listMessage[findMessage];
+      listMessage.splice(findMessage, 1);
+      listMessage.unshift(currentMessage)
+    } else {
+      listMessage.unshift(response.data.data.message);
+    }
+    chatStore.state.messages = listMessage
+    $('#addContact-exampleModal').modal('hide');
+  }
+}
+const createGroup = async () => {
+  const response = await axiosInstance.post(`/chat/create-group`, group.value);
+  newMessage(response.data.data.message);
+  group.value = {
+    name: '',
+    member: [],
+    message: ''
+  };
+  $('#addgroup-exampleModal').modal('hide');
+}
 onMounted(() => {
   socketIo.connect();
+  socketIo.on('ListNewMessage', (message) => {
+    newMessage(message);
+  })
 });
+const newMessage = (message) => {
+  let listMessage = chatStore.state.messages;
+  const findMessage = listMessage.findIndex((item) => item._id == message._id);
+  if (findMessage !== -1) {
+    listMessage[findMessage].last_message = message.last_message;
+    let currentMessage = listMessage[findMessage];
+    listMessage.splice(findMessage, 1);
+    listMessage.unshift(currentMessage)
+  } else {
+    listMessage.unshift(message);
+  }
+  chatStore.state.messages = listMessage
+}
+
 getListMessage();
 </script>

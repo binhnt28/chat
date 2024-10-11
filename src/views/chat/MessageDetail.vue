@@ -3,12 +3,14 @@ import {defineProps, ref, watch, onMounted, nextTick } from 'vue';
 import axiosInstance from "@/axios.js";
 import socketIo from "@/socket-io.js";
 import store from "@/store/auth.js";
+import chatStore from "@/store/chat.js";
 import SimpleBar from 'simplebar'
 const props = defineProps({
   messageId: {
     type: String
   }
  });
+let message = ref(null);
 let messages = ref([]);
 let messageContent = ref('');
 let info = ref({});
@@ -17,6 +19,8 @@ const fetchMessage = async (messageId) => {
   const response = await axiosInstance.get(`/chat/detail-message/${messageId}`);
   messages.value = response.data.data.messages;
   info.value = response.data.data.message.info[0];
+  console.log(response.data.data.message);
+  message.value = response.data.data.message;
   nextTick(() => {
     scrollToBottom();
   })
@@ -24,13 +28,25 @@ const fetchMessage = async (messageId) => {
 
 const sendMessage = async () => {
   let data = {
-      'receiveId': info.value._id,
+      'receiveId': message.value.group_id == null ? info.value._id : message.value.group_id._id,
       'message': messageContent.value
   }
   const response = await axiosInstance.post(`/chat/create-message`, data);
   if (response.data.status) {
     messageContent.value = '';
-    socketIo.emit('newMessage', { roomId: currentRoom.value, data: response.data.data})
+    let listMessage = chatStore.state.messages;
+    const findMessage = listMessage.findIndex((item) => item._id == response.data.data.message._id);
+    if (findMessage !== -1) {
+      listMessage[findMessage].last_message = response.data.data.message.last_message;
+      let currentMessage = listMessage[findMessage];
+      listMessage.splice(findMessage, 1);
+      listMessage.unshift(currentMessage)
+    } else {
+      listMessage.unshift(response.data.data.message);
+    }
+    chatStore.state.messages = listMessage
+    newMessage(response.data.data.message.last_message);
+    socketIo.emit('sendMessage', { roomId: currentRoom.value, data: response.data.data})
     scrollToBottom();
   }
 }
@@ -78,13 +94,8 @@ const newMessage = (message) => {
 }
 
 onMounted(() => {
-  socketIo.on('Message', (message) => {
-    console.log('tin nhắn mới');
+  socketIo.on('newMessage', (message) => {
     newMessage(message.last_message);
-  });
-  socketIo.on('Message1', (message) => {
-    console.log('tin nhắn mới1');
-    // newMessage(message.last_message);
   });
 });
 
