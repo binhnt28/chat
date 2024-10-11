@@ -728,8 +728,8 @@
                                   <ul class="list-unstyled contact-list">
                                     <li v-for="user in allUser">
                                       <div class="form-check">
-                                        <input type="checkbox" :value="user._id" class="form-check-input" id="memberCheck{{user.email}}" v-model="group.member">
-                                        <label class="form-check-label" for="memberCheck{{user.email}}">{{user.name}}</label>
+                                        <input type="checkbox" :value="user._id" class="form-check-input" :id="'memberCheck'+ user.email" v-model="group.member">
+                                        <label class="form-check-label" :for="'memberCheck'+ user.email">{{user.name}}</label>
                                       </div>
                                     </li>
                                   </ul>
