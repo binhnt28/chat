@@ -1,8 +1,9 @@
 <script setup>
-import {defineProps, ref, watch, onMounted } from 'vue';
+import {defineProps, ref, watch, onMounted, nextTick } from 'vue';
 import axiosInstance from "@/axios.js";
 import socketIo from "@/socket-io.js";
 import store from "@/store/auth.js";
+import SimpleBar from 'simplebar'
 const props = defineProps({
   messageId: {
     type: String
@@ -16,6 +17,9 @@ const fetchMessage = async (messageId) => {
   const response = await axiosInstance.get(`/chat/detail-message/${messageId}`);
   messages.value = response.data.data.messages;
   info.value = response.data.data.message.info[0];
+  nextTick(() => {
+    scrollToBottom();
+  })
 }
 
 const sendMessage = async () => {
@@ -24,6 +28,11 @@ const sendMessage = async () => {
       'message': messageContent.value
   }
   const response = await axiosInstance.post(`/chat/create-message`, data);
+  if (response.data.status) {
+    messageContent.value = '';
+    socketIo.emit('newMessage', { roomId: currentRoom.value, data: response.data.data})
+    scrollToBottom();
+  }
 }
 
 const formatDate = (dateString) => {
@@ -38,6 +47,7 @@ const formatDate = (dateString) => {
     return `${formattedDate} ${formattedTime}`;
   }
 };
+
 watch(() => props.messageId, (newMessageId) => {
   if (newMessageId) {
     fetchMessage(newMessageId);
@@ -50,9 +60,31 @@ watch(() => props.messageId, (newMessageId) => {
     }
   }
 });
+const scrollToBottom = () => {
+  const chatConversationchatConversation = document.getElementById('chat-conversation');
+  const simpleBarInstance = new SimpleBar(chatConversationchatConversation);
+  if (simpleBarInstance) {
+      const scrollElement = simpleBarInstance.getScrollElement();
+      scrollElement.scrollTop = scrollElement.scrollHeight
+  } else {
+    console.log('SimpleBar chưa khởi tạo.');
+  }
+}
+const newMessage = (message) => {
+ messages.value.push(message);
+ nextTick(() => {
+   scrollToBottom();
+ });
+}
+
 onMounted(() => {
-  socketIo.on('newMessage', (message) => {
-    messages.value.push(message.last_message);
+  socketIo.on('Message', (message) => {
+    console.log('tin nhắn mới');
+    newMessage(message.last_message);
+  });
+  socketIo.on('Message1', (message) => {
+    console.log('tin nhắn mới1');
+    // newMessage(message.last_message);
   });
 });
 
@@ -129,8 +161,9 @@ onMounted(() => {
         <!-- end chat user head -->
 
         <!-- start chat conversation -->
-        <div class="chat-conversation p-3 p-lg-4" data-simplebar="init">
-          <ul class="list-unstyled mb-0">
+        <div class="chat-conversation p-3 p-lg-4" id="chat-conversation">
+          <ul class="list-unstyled mb-0" id="list-message">
+
 <!--            <li>-->
 <!--              <div class="conversation-list">-->
 <!--                <div class="chat-avatar">-->

@@ -680,10 +680,6 @@
                             <div class="card-body p-2">
                               <div data-simplebar style="max-height: 150px;">
                                 <div>
-                                  <div class="p-3 fw-bold text-primary">
-                                    A
-                                  </div>
-
                                   <ul class="list-unstyled contact-list">
                                     <li>
                                       <div class="form-check">
@@ -691,16 +687,8 @@
                                         <label class="form-check-label" for="memberCheck1">Albert Rodarte</label>
                                       </div>
                                     </li>
-
-                                    <li>
-                                      <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="memberCheck2">
-                                        <label class="form-check-label" for="memberCheck2">Allison Etter</label>
-                                      </div>
-                                    </li>
                                   </ul>
                                 </div>
-
                                 <div>
                                   <div class="p-3 fw-bold text-primary">
                                     C
