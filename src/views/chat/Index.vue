@@ -397,7 +397,7 @@
               <div class="item">
                 <a href="#" class="user-status-box">
                   <div class="avatar-xs mx-auto d-block chat-user-img online">
-                    <img src="../assets/images/users/avatar-2.jpg" alt="user-img" class="img-fluid rounded-circle">
+                    <img src="@/assets/images/users/avatar-2.jpg" alt="user-img" class="img-fluid rounded-circle">
                     <span class="user-status"></span>
                   </div>
 
@@ -407,7 +407,7 @@
               <div class="item">
                 <a href="#" class="user-status-box">
                   <div class="avatar-xs mx-auto d-block chat-user-img online">
-                    <img src="../assets/images/users/avatar-4.jpg" alt="user-img" class="img-fluid rounded-circle">
+                    <img src="@/assets/images/users/avatar-4.jpg" alt="user-img" class="img-fluid rounded-circle">
                     <span class="user-status"></span>
                   </div>
 
@@ -418,7 +418,7 @@
               <div class="item">
                 <a href="#" class="user-status-box">
                   <div class="avatar-xs mx-auto d-block chat-user-img online">
-                    <img src="../assets/images/users/avatar-5.jpg" alt="user-img" class="img-fluid rounded-circle">
+                    <img src="@/assets/images/users/avatar-5.jpg" alt="user-img" class="img-fluid rounded-circle">
                     <span class="user-status"></span>
                   </div>
 
@@ -429,7 +429,7 @@
               <div class="item">
                 <a href="#" class="user-status-box">
                   <div class="avatar-xs mx-auto d-block chat-user-img online">
-                    <img src="../assets/images/users/avatar-6.jpg" alt="user-img" class="img-fluid rounded-circle">
+                    <img src="@/assets/images/users/avatar-6.jpg" alt="user-img" class="img-fluid rounded-circle">
                     <span class="user-status"></span>
                   </div>
 
